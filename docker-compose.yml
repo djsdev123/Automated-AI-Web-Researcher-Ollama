@@ -1,84 +1,23 @@
 version: '3.8'
 
 services:
-  # Main AI Researcher Application
   researcher:
-    build:
-      context: .
-      dockerfile: Dockerfile
-    container_name: ai-researcher
+    build: .
+    env_file: .env
+    volumes:
+      - .:/workspace
+      - ./data:/app/data
+      - ./logs:/app/logs
     stdin_open: true
     tty: true
 
-    # All configuration comes from .env file (single source of truth)
-    env_file:
-      - .env
-
-    volumes:
-      - ./data:/app/data
-      - ./logs:/app/logs
-      - ./config:/app/config
-
-    networks:
-      - researcher-net
-
-    extra_hosts:
-      - "host.docker.internal:host-gateway"
-
-    # Docker built-in healthcheck
-    healthcheck:
-      test: ["CMD", "python3", "-c", "import sys; sys.exit(0)"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-      start_period: 10s
-
-    restart: unless-stopped
-
-  # LiteLLM Proxy - Web UI for LLM interaction
   litellm:
     image: ghcr.io/berriai/litellm:main-latest
-    container_name: litellm-proxy
-
-    # Reads OLLAMA_BASE_URL and API keys from .env
-    env_file:
-      - .env
-
-    environment:
-      # Map .env vars to LiteLLM expected names
-      - OLLAMA_API_BASE=${OLLAMA_BASE_URL}
-      - DATABASE_URL=sqlite:////app/litellm.db
-
-    ports:
-      - "${LITELLM_PORT:-4000}:4000"
-
+    env_file: .env
+    ports: ["${LITELLM_PORT:-4000}:4000"]
     volumes:
       - litellm-data:/app
       - ./config/litellm-config.yaml:/app/config.yaml:ro
 
-    networks:
-      - researcher-net
-
-    extra_hosts:
-      - "host.docker.internal:host-gateway"
-
-    # Docker built-in healthcheck
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:4000/health"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-      start_period: 10s
-
-    restart: unless-stopped
-
-    command: ["--config", "/app/config.yaml", "--port", "4000"]
-
-networks:
-  researcher-net:
-    driver: bridge
-    name: ai-researcher-network
-
 volumes:
   litellm-data:
-    name: litellm-data

@@ -1,70 +1,17 @@
 {
-  "name": "AI Researcher Development",
-  "build": {
-    "dockerfile": "Dockerfile"
-  },
+  "name": "AI Researcher",
+  "dockerComposeFile": "../docker-compose.yml",
+  "service": "researcher",
   "workspaceFolder": "/workspace",
-
   "customizations": {
     "vscode": {
       "extensions": [
         "ms-python.python",
-        "ms-python.vscode-pylance",
-        "ms-python.black-formatter",
-        "charliermarsh.ruff"
-      ],
-      "settings": {
-        "python.defaultInterpreterPath": "/usr/local/bin/python",
-        "[python]": {
-          "editor.defaultFormatter": "ms-python.black-formatter",
-          "editor.formatOnSave": true
-        }
-      },
-      // VS Code built-in tasks for diagnostics
-      "tasks": {
-        "version": "2.0.0",
-        "tasks": [
-          {
-            "label": "Docker: Validate Configuration",
-            "type": "shell",
-            "command": "make validate",
-            "problemMatcher": [],
-            "presentation": {
-              "reveal": "always",
-              "panel": "new"
-            }
-          },
-          {
-            "label": "Docker: Run Diagnostics",
-            "type": "shell",
-            "command": "make diagnose",
-            "problemMatcher": [],
-            "presentation": {
-              "reveal": "always",
-              "panel": "new"
-            }
-          }
-        ]
-      }
+        "ms-python.vscode-pylance"
+      ]
     }
   },
-
-  "containerEnv": {
-    "PYTHONUNBUFFERED": "1",
-    "OLLAMA_BASE_URL": "http://host.docker.internal:11434",
-    "OLLAMA_MODEL": "phi3:3.8b-mini-128k-instruct",
-    "LLM_PROVIDER": "ollama",
-    "CONFIG_PATH": "/workspace/config/config.yaml",
-    "LOG_LEVEL": "INFO"
-  },
-
   "forwardPorts": [11434, 4000],
-
-  // Use Make for setup (industry standard)
-  "postCreateCommand": "pip install --user -r requirements.txt && pip install --user -r requirements-dev.txt",
-
-  // Pre-flight check using Make
-  "initializeCommand": "command -v docker >/dev/null 2>&1 || echo 'Warning: Docker not found'",
-
+  "postCreateCommand": "pip install --user -r requirements.txt",
   "remoteUser": "vscode"
 }
