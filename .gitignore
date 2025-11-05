@@ -41,3 +41,21 @@ build/
 # Other
 *.bak
 *.tmp
+
+# Docker & DevContainer
+.env.local
+.env.*.local
+docker-compose.override.yml
+.devcontainer/.env
+
+# Research data (use Docker volumes)
+data/
+research_session_*.txt
+
+# LiteLLM database
+litellm.db
+litellm.db-*
+
+# Allow requirements files
+!requirements.txt
+!requirements-dev.txt

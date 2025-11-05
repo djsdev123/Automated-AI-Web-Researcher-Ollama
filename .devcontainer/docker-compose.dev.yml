@@ -1,0 +1,53 @@
+version: '3.8'
+
+services:
+  researcher-dev:
+    build:
+      context: ..
+      dockerfile: .devcontainer/Dockerfile
+    container_name: ai-researcher-dev
+
+    # Interactive terminal support
+    stdin_open: true
+    tty: true
+
+    # Mount workspace
+    volumes:
+      - ..:/workspace:cached
+      - vscode-extensions:/home/vscode/.vscode-server/extensions
+      - vscode-extensions-insiders:/home/vscode/.vscode-server-insiders/extensions
+
+    # Environment variables
+    environment:
+      - OLLAMA_BASE_URL=http://host.docker.internal:11434
+      - OLLAMA_MODEL=phi3:3.8b-mini-128k-instruct
+      - LLM_PROVIDER=ollama
+      - LOG_LEVEL=DEBUG
+      - CONFIG_PATH=/workspace/config/config.yaml
+
+    # Network configuration
+    networks:
+      - dev-network
+
+    # Allow connection to host services
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+
+    # Keep container running
+    command: sleep infinity
+
+    # Resource limits (adjust as needed)
+    deploy:
+      resources:
+        limits:
+          cpus: '4'
+          memory: 8G
+
+networks:
+  dev-network:
+    driver: bridge
+    name: ai-researcher-dev-network
+
+volumes:
+  vscode-extensions:
+  vscode-extensions-insiders:

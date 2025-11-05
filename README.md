@@ -35,48 +35,90 @@ The key distinction is that this isn't just a chatbot—it's an automated resear
 - Research conversation mode for exploring findings
 
 ## Installation
-**Note:** To use on Windows, follow the instructions on the [/feature/windows-support](https://github.com/TheBlewish/Automated-AI-Web-Researcher-Ollama/tree/feature/windows-support) branch. For Linux and MacOS, use this main branch and the follow steps below:
+
+### 🐳 Docker Installation (Recommended)
+
+The easiest way to get started is with Docker:
 
 1. **Clone the repository:**
+    ```sh
+    git clone https://github.com/TheBlewish/Automated-AI-Web-Researcher-Ollama
+    cd Automated-AI-Web-Researcher-Ollama
+    ```
 
+2. **Set up configuration:**
+    ```sh
+    cp .env.example .env
+    # Edit .env with your LLM provider settings
+    ```
+
+3. **Start Ollama on your host** (for local LLM):
+    ```sh
+    ollama serve
+    ollama pull phi3:3.8b-mini-128k-instruct
+    ```
+
+4. **Run with Docker:**
+    ```sh
+    docker-compose up --build
+    ```
+
+**Features:**
+- ✅ No Python environment setup needed
+- ✅ Includes LiteLLM web UI (http://localhost:4000)
+- ✅ Persistent data storage
+- ✅ Easy configuration management
+
+📖 **See [DOCKER.md](DOCKER.md) for complete Docker documentation**
+
+### 📦 Native Installation
+
+**Note:** To use on Windows, follow the instructions on the [/feature/windows-support](https://github.com/TheBlewish/Automated-AI-Web-Researcher-Ollama/tree/feature/windows-support) branch. For Linux and MacOS, use this main branch and follow steps below:
+
+1. **Clone the repository:**
     ```sh
     git clone https://github.com/TheBlewish/Automated-AI-Web-Researcher-Ollama
     cd Automated-AI-Web-Researcher-Ollama
     ```
 
 2. **Create and activate a virtual environment:**
-
     ```sh
     python -m venv venv
     source venv/bin/activate
     ```
 
 3. **Install dependencies:**
-
     ```sh
     pip install -r requirements.txt
     ```
 
 4. **Install and configure Ollama:**
-
     Install Ollama following the instructions at [https://ollama.ai](https://ollama.ai).
 
-    Using your selected model, reccommended to pick one with the required context length for lots of searches (`phi3:3.8b-mini-128k-instruct` or `phi3:14b-medium-128k-instruct` are recommended).
+    Using your selected model, recommended to pick one with the required context length for lots of searches (`phi3:3.8b-mini-128k-instruct` or `phi3:14b-medium-128k-instruct` are recommended).
 
-5. Go to the llm_config.py file which should have an ollama section that looks like this:
+5. **Configure your LLM:**
 
-```sh
-LLM_CONFIG_OLLAMA = {
-    "llm_type": "ollama",
-    "base_url": "http://localhost:11434",  # default Ollama server URL
-    "model_name": "custom-phi3-32k-Q4_K_M",  # Replace with your Ollama model name
-    "temperature": 0.7,
-    "top_p": 0.9,
-    "n_ctx": 55000,
-    "stop": ["User:", "\n\n"]
-```
+    **Option A: Use new config system** (recommended):
+    ```sh
+    cp .env.example .env
+    # Edit .env with your settings
+    ```
 
-Then change to the left of where it says replace with your Ollama model name, the "model_name" function, to the name of the model you have setup in Ollama to use with the program, you can now also change 'n_ctx' to set the desired context size.
+    **Option B: Use legacy config**:
+    Go to the llm_config.py file which should have an ollama section that looks like this:
+    ```python
+    LLM_CONFIG_OLLAMA = {
+        "llm_type": "ollama",
+        "base_url": "http://localhost:11434",
+        "model_name": "phi3:3.8b-mini-128k-instruct",
+        "temperature": 0.7,
+        "top_p": 0.9,
+        "n_ctx": 55000,
+        "stop": ["User:", "\n\n"]
+    }
+    ```
+    Then change the "model_name" to match your Ollama model.
    
 
 ## Usage
@@ -113,15 +155,61 @@ Then change to the left of where it says replace with your Ollama model name, th
         - Generated summary
 
 ## Configuration
-The LLM settings can be modified in `llm_config.py`. You must specify your model name in the configuration for the researcher to function. The default configuration is optimized for research tasks with the specified Phi-3 model.
+
+### Quick Configuration
+
+The easiest way to configure the application is using environment variables:
+
+```sh
+# Copy the template
+cp .env.example .env
+
+# Edit with your settings
+nano .env
+```
+
+**Key settings:**
+```env
+LLM_PROVIDER=ollama  # or openai, anthropic
+OLLAMA_MODEL=phi3:3.8b-mini-128k-instruct
+```
+
+### Advanced Configuration
+
+For advanced settings, edit `config/config.yaml`:
+- Research parameters (searches per cycle, focus areas)
+- Web scraping settings (timeouts, retries, rate limiting)
+- UI preferences (colors, input mode)
+- Logging levels
+
+📖 **See [CONFIGURATION.md](CONFIGURATION.md) for complete configuration reference**
+
+### Legacy Configuration
+
+The LLM settings can also be modified in `llm_config.py` (legacy method). You must specify your model name in the configuration for the researcher to function. The default configuration is optimized for research tasks with the specified Phi-3 model.
 
 ## Current Status
 This is a prototype that demonstrates functional automated research capabilities. While still in development, it successfully performs structured research tasks. It has been tested and works well with the `phi3:3.8b-mini-128k-instruct` model when the context is set as advised previously.
 
 ## Dependencies
-- Ollama
+
+### Docker Deployment (Recommended)
+- Docker Desktop or Docker Engine
+- Ollama (running on host machine)
+- See [DOCKER.md](DOCKER.md) for details
+
+### Native Deployment
+- Python 3.11+
+- Ollama (or OpenAI/Anthropic API keys)
 - Python packages listed in `requirements.txt`
 - Recommended models: `phi3:3.8b-mini-128k-instruct` or `phi3:14b-medium-128k-instruct` (with custom context length as specified)
+
+### LLM Providers
+- **Ollama** (free, local): Recommended for privacy and cost
+- **OpenAI** (paid API): High-quality models (GPT-4, GPT-4o)
+- **Anthropic** (paid API): Claude models with large context
+
+⚠️ **Warning:** Cloud API providers charge per request. Research sessions make 50-200+ API calls. Monitor your usage!
 
 ## Contributing
 Contributions are welcome! This is a prototype with room for improvements and new features.

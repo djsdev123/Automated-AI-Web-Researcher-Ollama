@@ -1,0 +1,184 @@
+# Automated AI Web Researcher - Configuration File
+# This file supports environment variable interpolation using ${VAR:-default} syntax
+
+# Application Settings
+app:
+  name: "Automated AI Web Researcher"
+  version: "2.0.0"
+  log_level: "${LOG_LEVEL:-INFO}"  # DEBUG, INFO, WARNING, ERROR, CRITICAL
+  log_directory: "${LOG_DIR:-/app/logs}"
+  data_directory: "${DATA_DIR:-/app/data}"
+
+# LLM Provider Configuration
+llm:
+  # Active provider: ollama, openai, anthropic
+  provider: "${LLM_PROVIDER:-ollama}"
+
+  # Ollama Configuration (Local LLM)
+  ollama:
+    base_url: "${OLLAMA_BASE_URL:-http://localhost:11434}"
+    model_name: "${OLLAMA_MODEL:-phi3:3.8b-mini-128k-instruct}"
+    temperature: 0.7
+    top_p: 0.9
+    n_ctx: 55000  # Context window size
+    stop_sequences:
+      - "User:"
+      - "\n\n"
+
+  # OpenAI Configuration
+  openai:
+    api_key: "${OPENAI_API_KEY:-}"
+    base_url: "${OPENAI_BASE_URL:-}"  # Optional: for OpenAI-compatible endpoints
+    model_name: "${OPENAI_MODEL:-gpt-4o}"
+    temperature: 0.7
+    top_p: 0.9
+    max_tokens: 4096
+    stop_sequences:
+      - "User:"
+      - "\n\n"
+    presence_penalty: 0
+    frequency_penalty: 0
+
+  # Anthropic Configuration
+  anthropic:
+    api_key: "${ANTHROPIC_API_KEY:-}"
+    model_name: "${ANTHROPIC_MODEL:-claude-3-5-sonnet-latest}"
+    temperature: 0.7
+    top_p: 0.9
+    max_tokens: 4096
+    stop_sequences:
+      - "User:"
+      - "\n\n"
+
+# Research Engine Settings
+research:
+  # General Settings
+  max_searches_per_cycle: 5
+  max_focus_areas: 5
+  document_size_limit_ratio: 0.9  # Stop when doc reaches 90% of context limit
+
+  # Strategic Analysis
+  focus_area_generation:
+    retry_attempts: 3
+    min_areas: 5
+    max_areas: 5
+
+  # Search Configuration
+  search:
+    provider: "duckduckgo"
+    max_results: 10
+    pages_to_scrape: 2
+    retry_attempts: 3
+    retry_delay_base: 2  # Seconds, uses exponential backoff
+    time_range_options:
+      - "d"    # Day
+      - "w"    # Week
+      - "m"    # Month
+      - "y"    # Year
+      - "none" # No limit
+
+  # Web Scraping Configuration
+  web_scraping:
+    timeout: 30  # Request timeout in seconds
+    max_retries: 3
+    rate_limit: 1  # Minimum seconds between requests to same domain
+    user_agent: "AIResearcher/2.0 (+https://github.com/TheBlewish/Automated-AI-Web-Researcher-Ollama)"
+    respect_robots_txt: false  # Currently hardcoded in web_scraper.py
+    max_content_length: 2400  # Characters to extract from each page
+    max_workers: 5  # Parallel scraping workers
+
+  # Session Management
+  session:
+    output_format: "txt"  # Future: support json, markdown
+    filename_pattern: "research_session_{number}.txt"
+    auto_increment: true
+
+# Terminal UI Configuration
+ui:
+  # Display Settings
+  enable_colors: true
+  color_scheme:
+    thinking: "magenta"
+    searching: "magenta"
+    success: "green"
+    warning: "yellow"
+    error: "red"
+    info: "cyan"
+
+  # Input Mode
+  input_mode: "curses"  # curses (interactive) or simple (non-interactive)
+
+  # Progress Indicators
+  progress_indicators:
+    enabled: true
+    spinner_chars: ["|", "/", "-", "\\"]
+    update_interval: 0.2  # Seconds
+
+  # Curses-specific Settings
+  curses:
+    enable_mouse: false
+    enable_scroll: true
+    status_line_height: 1
+    input_area_height: 3
+
+# Logging Configuration
+logging:
+  # File Logging
+  file:
+    enabled: true
+    level: "${LOG_LEVEL:-INFO}"
+    format: "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+    max_bytes: 10485760  # 10MB
+    backup_count: 5
+
+  # Console Logging
+  console:
+    enabled: false  # Disabled to avoid conflicts with curses UI
+    level: "WARNING"
+
+  # Module-specific Log Levels
+  modules:
+    llm_wrapper: "INFO"
+    research_manager: "INFO"
+    web_scraper: "WARNING"
+    duckduckgo_search: "WARNING"
+    requests: "WARNING"
+    urllib3: "WARNING"
+
+# Feature Flags (for future enhancements)
+features:
+  conversation_mode: true
+  pause_and_assess: true
+  auto_summarization: true
+
+  # Future features (not yet implemented)
+  web_ui: false
+  api_server: false
+  multi_language: false
+  export_formats: ["txt"]  # Future: pdf, docx, html
+
+# Performance Settings
+performance:
+  # Async/Threading
+  enable_async_search: true
+  max_concurrent_scrapes: 5
+
+  # Caching (future feature)
+  enable_cache: false
+  cache_ttl: 3600  # Seconds
+
+# Security Settings
+security:
+  # API Key Validation
+  require_api_keys: false  # Set to true in production
+
+  # Rate Limiting (future feature)
+  enable_rate_limiting: false
+  max_requests_per_minute: 60
+
+# Development/Debug Settings
+debug:
+  enabled: false
+  verbose_llm_output: false
+  save_raw_responses: false
+  profiling: false

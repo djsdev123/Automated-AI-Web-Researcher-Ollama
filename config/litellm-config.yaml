@@ -1,0 +1,69 @@
+# LiteLLM Proxy Configuration
+# Web UI for interacting with multiple LLM providers
+
+model_list:
+  # Ollama models (running on host)
+  - model_name: phi3
+    litellm_params:
+      model: ollama/phi3:3.8b-mini-128k-instruct
+      api_base: http://host.docker.internal:11434
+
+  - model_name: llama3
+    litellm_params:
+      model: ollama/llama3
+      api_base: http://host.docker.internal:11434
+
+  # OpenAI models (if API key provided)
+  - model_name: gpt-4o
+    litellm_params:
+      model: gpt-4o
+      api_key: ${OPENAI_API_KEY}
+    model_info:
+      supports_vision: true
+
+  - model_name: gpt-4o-mini
+    litellm_params:
+      model: gpt-4o-mini
+      api_key: ${OPENAI_API_KEY}
+
+  # Anthropic models (if API key provided)
+  - model_name: claude-sonnet
+    litellm_params:
+      model: claude-3-5-sonnet-latest
+      api_key: ${ANTHROPIC_API_KEY}
+
+  - model_name: claude-haiku
+    litellm_params:
+      model: claude-3-5-haiku-latest
+      api_key: ${ANTHROPIC_API_KEY}
+
+# General Settings
+general_settings:
+  master_key: ${LITELLM_MASTER_KEY:-sk-1234}
+  database_url: sqlite:////app/litellm.db
+
+  # UI Settings
+  ui:
+    title: "AI Researcher LLM Proxy"
+    theme: "dark"
+
+  # Logging
+  litellm_settings:
+    drop_params: true
+    set_verbose: false
+    json_logs: true
+
+# Router Settings
+router_settings:
+  routing_strategy: simple-shuffle
+  num_retries: 3
+  timeout: 300
+
+  # Fallback configuration
+  fallbacks:
+    - phi3: [llama3]
+    - gpt-4o: [gpt-4o-mini, claude-sonnet]
+
+# Environment variables
+environment_variables:
+  OLLAMA_API_BASE: http://host.docker.internal:11434
