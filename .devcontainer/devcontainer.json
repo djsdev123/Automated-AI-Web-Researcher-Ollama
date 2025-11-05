@@ -1,8 +1,11 @@
 {
   "name": "AI Researcher Development",
-  "dockerComposeFile": "docker-compose.dev.yml",
-  "service": "researcher-dev",
+  "build": {
+    "dockerfile": "Dockerfile",
+    "context": ".."
+  },
   "workspaceFolder": "/workspace",
+  "workspaceMount": "source=${localWorkspaceFolder},target=/workspace,type=bind,consistency=cached",
 
   "customizations": {
     "vscode": {
@@ -20,20 +23,20 @@
         "python.defaultInterpreterPath": "/usr/local/bin/python",
         "[python]": {
           "editor.defaultFormatter": "ms-python.black-formatter",
-          "editor.formatOnSave": true,
-          "editor.codeActionsOnSave": {
-            "source.organizeImports": "explicit"
-          }
+          "editor.formatOnSave": true
         },
-        "python.analysis.typeCheckingMode": "basic",
         "editor.rulers": [88, 120],
-        "editor.tabSize": 4,
-        "files.exclude": {
-          "**/__pycache__": true,
-          "**/*.pyc": true
-        }
+        "editor.tabSize": 4
       }
     }
+  },
+
+  "containerEnv": {
+    "PYTHONUNBUFFERED": "1",
+    "OLLAMA_BASE_URL": "http://host.docker.internal:11434",
+    "OLLAMA_MODEL": "phi3:3.8b-mini-128k-instruct",
+    "LLM_PROVIDER": "ollama",
+    "CONFIG_PATH": "/workspace/config/config.yaml"
   },
 
   "forwardPorts": [11434, 4000],
