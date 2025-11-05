@@ -19,6 +19,32 @@
           "editor.defaultFormatter": "ms-python.black-formatter",
           "editor.formatOnSave": true
         }
+      },
+      // VS Code built-in tasks for diagnostics
+      "tasks": {
+        "version": "2.0.0",
+        "tasks": [
+          {
+            "label": "Docker: Validate Configuration",
+            "type": "shell",
+            "command": "make validate",
+            "problemMatcher": [],
+            "presentation": {
+              "reveal": "always",
+              "panel": "new"
+            }
+          },
+          {
+            "label": "Docker: Run Diagnostics",
+            "type": "shell",
+            "command": "make diagnose",
+            "problemMatcher": [],
+            "presentation": {
+              "reveal": "always",
+              "panel": "new"
+            }
+          }
+        ]
       }
     }
   },
@@ -34,7 +60,11 @@
 
   "forwardPorts": [11434, 4000],
 
+  // Use Make for setup (industry standard)
   "postCreateCommand": "pip install --user -r requirements.txt && pip install --user -r requirements-dev.txt",
+
+  // Pre-flight check using Make
+  "initializeCommand": "command -v docker >/dev/null 2>&1 || echo 'Warning: Docker not found'",
 
   "remoteUser": "vscode"
 }

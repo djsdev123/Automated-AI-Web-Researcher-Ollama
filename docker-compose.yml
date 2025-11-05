@@ -25,6 +25,14 @@ services:
     extra_hosts:
       - "host.docker.internal:host-gateway"
 
+    # Docker built-in healthcheck
+    healthcheck:
+      test: ["CMD", "python3", "-c", "import sys; sys.exit(0)"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+
     restart: unless-stopped
 
   # LiteLLM Proxy - Web UI for LLM interaction
@@ -53,6 +61,14 @@ services:
 
     extra_hosts:
       - "host.docker.internal:host-gateway"
+
+    # Docker built-in healthcheck
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:4000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
 
     restart: unless-stopped
 
