@@ -1,0 +1,45 @@
+# Linux-Specific Diagnostic Checks
+# Imported by main rules.yaml for Linux systems only
+
+checks:
+  - name: docker-service-running
+    description: Check Docker service (systemd) is running
+    type: command
+    platforms: linux
+    severity: critical
+    parameters:
+      command: "systemctl is-active docker || service docker status"
+      timeout: 5
+
+  - name: user-in-docker-group
+    description: Check current user is in docker group
+    type: command
+    platforms: linux
+    severity: warning
+    parameters:
+      command: "groups | grep -q docker"
+      timeout: 5
+
+  - name: docker-socket-permissions
+    description: Check Docker socket has correct permissions
+    type: command
+    platforms: linux
+    severity: critical
+    parameters:
+      command: "test -r /var/run/docker.sock -a -w /var/run/docker.sock"
+      timeout: 5
+
+fixes:
+  docker-service-running:
+    - "Start Docker service: sudo systemctl start docker"
+    - "Enable on boot: sudo systemctl enable docker"
+    - "Or: sudo service docker start"
+
+  user-in-docker-group:
+    - "Add user to docker group: sudo usermod -aG docker $USER"
+    - "Log out and log back in for group changes to take effect"
+    - "Or: newgrp docker"
+
+  docker-socket-permissions:
+    - "Fix permissions: sudo chmod 666 /var/run/docker.sock"
+    - "Or add user to docker group (preferred method)"
