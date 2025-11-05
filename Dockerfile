@@ -15,8 +15,9 @@ RUN apt-get update && apt-get install -y \
     curl \
     # For git operations
     git \
-    # Minimal build tools for pure Python packages
+    # Build tools (gcc for C, g++ for C++ in llama-cpp-python)
     gcc \
+    g++ \
     && rm -rf /var/lib/apt/lists/*
 
 # Set working directory
