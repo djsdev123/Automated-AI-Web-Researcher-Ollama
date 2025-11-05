@@ -7,37 +7,21 @@ services:
       context: .
       dockerfile: Dockerfile
     container_name: ai-researcher
-    stdin_open: true  # Required for interactive terminal
-    tty: true         # Required for curses UI
-    environment:
-      # LLM Configuration
-      - LLM_PROVIDER=${LLM_PROVIDER:-ollama}
-      - OLLAMA_BASE_URL=${OLLAMA_BASE_URL:-http://host.docker.internal:11434}
-      - OLLAMA_MODEL=${OLLAMA_MODEL:-phi3:3.8b-mini-128k-instruct}
+    stdin_open: true
+    tty: true
 
-      # API Keys (for OpenAI/Anthropic)
-      - OPENAI_API_KEY=${OPENAI_API_KEY:-}
-      - OPENAI_BASE_URL=${OPENAI_BASE_URL:-}
-      - OPENAI_MODEL=${OPENAI_MODEL:-gpt-4o}
-      - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY:-}
-      - ANTHROPIC_MODEL=${ANTHROPIC_MODEL:-claude-3-5-sonnet-latest}
-
-      # Application Configuration
-      - CONFIG_PATH=/app/config/config.yaml
-      - LOG_LEVEL=${LOG_LEVEL:-INFO}
+    # All configuration comes from .env file (single source of truth)
+    env_file:
+      - .env
 
     volumes:
-      # Persistent data storage
       - ./data:/app/data
       - ./logs:/app/logs
       - ./config:/app/config
-      # Optional: Mount custom config
-      # - ./my-config.yaml:/app/config/config.yaml:ro
 
     networks:
       - researcher-net
 
-    # Allow connection to host services (Ollama)
     extra_hosts:
       - "host.docker.internal:host-gateway"
 
@@ -47,19 +31,18 @@ services:
   litellm:
     image: ghcr.io/berriai/litellm:main-latest
     container_name: litellm-proxy
-    ports:
-      - "${LITELLM_PORT:-4000}:4000"
-    environment:
-      # Point to host's Ollama
-      - OLLAMA_API_BASE=${OLLAMA_BASE_URL:-http://host.docker.internal:11434}
 
-      # LiteLLM Configuration
-      - LITELLM_MASTER_KEY=${LITELLM_MASTER_KEY:-sk-1234}
+    # Reads OLLAMA_BASE_URL and API keys from .env
+    env_file:
+      - .env
+
+    environment:
+      # Map .env vars to LiteLLM expected names
+      - OLLAMA_API_BASE=${OLLAMA_BASE_URL}
       - DATABASE_URL=sqlite:////app/litellm.db
 
-      # Optional: OpenAI/Anthropic passthrough
-      - OPENAI_API_KEY=${OPENAI_API_KEY:-}
-      - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY:-}
+    ports:
+      - "${LITELLM_PORT:-4000}:4000"
 
     volumes:
       - litellm-data:/app

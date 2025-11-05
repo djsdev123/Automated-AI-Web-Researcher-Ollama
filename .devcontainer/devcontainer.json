@@ -31,11 +31,10 @@
     }
   },
 
+  "runArgs": ["--env-file", "${localWorkspaceFolder}/.env"],
+
   "containerEnv": {
     "PYTHONUNBUFFERED": "1",
-    "OLLAMA_BASE_URL": "http://host.docker.internal:11434",
-    "OLLAMA_MODEL": "phi3:3.8b-mini-128k-instruct",
-    "LLM_PROVIDER": "ollama",
     "CONFIG_PATH": "/workspace/config/config.yaml"
   },
 

@@ -1,35 +1,37 @@
 # Automated AI Web Researcher - Configuration File
-# This file supports environment variable interpolation using ${VAR:-default} syntax
+# =============================================================================
+# NOTE: For most settings, use .env file instead!
+# Values here use ${VAR:-default} which reads from .env first
+# =============================================================================
 
-# Application Settings
 app:
   name: "Automated AI Web Researcher"
   version: "2.0.0"
-  log_level: "${LOG_LEVEL:-INFO}"  # DEBUG, INFO, WARNING, ERROR, CRITICAL
+  log_level: "${LOG_LEVEL:-INFO}"
   log_directory: "${LOG_DIR:-/app/logs}"
   data_directory: "${DATA_DIR:-/app/data}"
 
-# LLM Provider Configuration
+# =============================================================================
+# LLM Configuration - Reads from .env automatically
+# =============================================================================
 llm:
-  # Active provider: ollama, openai, anthropic
   provider: "${LLM_PROVIDER:-ollama}"
 
-  # Ollama Configuration (Local LLM)
   ollama:
+    # These pull from .env - edit .env to change!
     base_url: "${OLLAMA_BASE_URL:-http://localhost:11434}"
     model_name: "${OLLAMA_MODEL:-phi3:3.8b-mini-128k-instruct}"
     temperature: 0.7
     top_p: 0.9
-    n_ctx: 55000  # Context window size
+    n_ctx: 55000
     stop_sequences:
       - "User:"
       - "\n\n"
 
-  # OpenAI Configuration
   openai:
     api_key: "${OPENAI_API_KEY:-}"
-    base_url: "${OPENAI_BASE_URL:-}"  # Optional: for OpenAI-compatible endpoints
-    model_name: "${OPENAI_MODEL:-gpt-4o}"
+    base_url: "${OPENAI_BASE_URL:-}"
+    model_name: "${OPENAI_MODEL:-gpt-4o-mini}"
     temperature: 0.7
     top_p: 0.9
     max_tokens: 4096
@@ -39,10 +41,9 @@ llm:
     presence_penalty: 0
     frequency_penalty: 0
 
-  # Anthropic Configuration
   anthropic:
     api_key: "${ANTHROPIC_API_KEY:-}"
-    model_name: "${ANTHROPIC_MODEL:-claude-3-5-sonnet-latest}"
+    model_name: "${ANTHROPIC_MODEL:-claude-3-5-haiku-latest}"
     temperature: 0.7
     top_p: 0.9
     max_tokens: 4096
