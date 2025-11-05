@@ -7,127 +7,38 @@
   "customizations": {
     "vscode": {
       "extensions": [
-        // Python
         "ms-python.python",
         "ms-python.vscode-pylance",
         "ms-python.black-formatter",
         "charliermarsh.ruff",
-
-        // Docker
         "ms-azuretools.vscode-docker",
-
-        // YAML
         "redhat.vscode-yaml",
-
-        // Git
-        "eamodio.gitlens",
-        "mhutchie.git-graph",
-
-        // General
-        "EditorConfig.EditorConfig",
-        "usernamehw.errorlens",
-        "streetsidesoftware.code-spell-checker"
+        "eamodio.gitlens"
       ],
 
       "settings": {
-        // Python settings
         "python.defaultInterpreterPath": "/usr/local/bin/python",
-        "python.linting.enabled": true,
-        "python.linting.pylintEnabled": false,
-        "python.linting.ruffEnabled": true,
-        "python.formatting.provider": "black",
-        "python.analysis.typeCheckingMode": "basic",
-        "python.analysis.autoImportCompletions": true,
-
-        // Editor settings
-        "editor.formatOnSave": true,
-        "editor.codeActionsOnSave": {
-          "source.organizeImports": true
-        },
-        "editor.rulers": [88, 120],
-        "editor.tabSize": 4,
-
-        // Files
-        "files.exclude": {
-          "**/__pycache__": true,
-          "**/*.pyc": true,
-          "**/.pytest_cache": true,
-          "**/.ruff_cache": true
-        },
-        "files.watcherExclude": {
-          "**/__pycache__/**": true,
-          "**/venv/**": true,
-          "**/data/**": true,
-          "**/logs/**": true
-        },
-
-        // Terminal
-        "terminal.integrated.defaultProfile.linux": "bash",
-        "terminal.integrated.profiles.linux": {
-          "bash": {
-            "path": "/bin/bash"
-          },
-          "fish": {
-            "path": "/usr/bin/fish"
+        "[python]": {
+          "editor.defaultFormatter": "ms-python.black-formatter",
+          "editor.formatOnSave": true,
+          "editor.codeActionsOnSave": {
+            "source.organizeImports": "explicit"
           }
         },
-
-        // YAML
-        "yaml.schemas": {
-          "file:///workspace/config/config.yaml": "config/*.yaml"
+        "python.analysis.typeCheckingMode": "basic",
+        "editor.rulers": [88, 120],
+        "editor.tabSize": 4,
+        "files.exclude": {
+          "**/__pycache__": true,
+          "**/*.pyc": true
         }
       }
     }
   },
 
-  // Forward ports for services
-  "forwardPorts": [
-    11434,  // Ollama on host
-    4000    // LiteLLM proxy
-  ],
+  "forwardPorts": [11434, 4000],
 
-  "portsAttributes": {
-    "11434": {
-      "label": "Ollama API",
-      "onAutoForward": "silent"
-    },
-    "4000": {
-      "label": "LiteLLM Web UI",
-      "onAutoForward": "notify"
-    }
-  },
+  "postCreateCommand": "pip install --user -r requirements.txt && pip install --user -r requirements-dev.txt",
 
-  // Post-create command to set up development environment
-  "postCreateCommand": "pip install -r requirements.txt && pip install -r requirements-dev.txt",
-
-  // Features to add to the dev container
-  "features": {
-    "ghcr.io/devcontainers/features/common-utils:2": {
-      "installZsh": true,
-      "installOhMyZsh": true,
-      "username": "vscode",
-      "userUid": "1000",
-      "userGid": "1000"
-    },
-    "ghcr.io/devcontainers/features/git:1": {
-      "version": "latest"
-    },
-    "ghcr.io/devcontainers/features/github-cli:1": {
-      "version": "latest"
-    }
-  },
-
-  // Use 'vscode' user
-  "remoteUser": "vscode",
-
-  // Container environment variables
-  "containerEnv": {
-    "PYTHONUNBUFFERED": "1",
-    "OLLAMA_BASE_URL": "http://host.docker.internal:11434"
-  },
-
-  // Mount type
-  "mounts": [
-    "source=/var/run/docker.sock,target=/var/run/docker.sock,type=bind"
-  ]
+  "remoteUser": "vscode"
 }
