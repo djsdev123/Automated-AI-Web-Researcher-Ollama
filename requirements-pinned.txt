@@ -1,0 +1,31 @@
+# Pinned Python dependencies for security and reproducibility
+# Generated: 2025-11-08
+# Python 3.11 compatible versions
+
+# Core LLM integration
+llama-cpp-python==0.3.2  # Latest stable as of 2025-01
+openai==1.58.1  # Latest stable, security patched
+anthropic==0.42.0  # Latest stable
+
+# Web scraping and search
+duckduckgo-search==7.2.0  # Latest stable
+requests==2.32.3  # Security: CVE-2024-35195 fixed in 2.32.0+
+beautifulsoup4==4.12.3  # Latest stable
+trafilatura==1.12.2  # Latest stable
+urllib3==2.2.3  # Security: CVE-2024-37891 fixed in 2.2.2+
+
+# Terminal/UI
+colorama==0.4.6  # Latest stable
+readchar==4.2.1  # Latest stable
+keyboard==0.13.5  # Latest stable
+windows-curses==2.4.0; sys_platform == 'win32'  # Latest stable
+tqdm==4.67.1  # Latest stable
+
+# Additional utilities
+pyyaml==6.0.2  # Security: CVE-2020-14343 fixed in 5.4+, latest 6.0.2
+
+# Development/Testing (optional - uncomment if needed)
+# pytest==8.3.4
+# pytest-cov==6.0.0
+# black==24.10.0
+# ruff==0.8.4

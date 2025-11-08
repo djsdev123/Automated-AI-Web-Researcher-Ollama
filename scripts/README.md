@@ -1,384 +1,193 @@
-# Diagnostic System Documentation
+# Testing & Verification Scripts
 
-## 🎯 Overview
+This directory contains scripts to verify prerequisites, test container builds, and check security before deployment.
 
-A modular, DRY (Don't Repeat Yourself), self-diagnosing troubleshooting system that follows least-privilege principles.
+## Quick Start
 
-### Design Principles
-
-1. **Modular**: Pluggable checks, easy to extend
-2. **DRY**: Single source of truth, no code duplication
-3. **Config-Driven**: All checks defined in YAML
-4. **Least Privilege**: Read-only operations, no sudo
-5. **Self-Diagnosing**: Automatically detects issues
-6. **Platform-Aware**: Adapts to macOS, Linux, Windows
-
-## 📁 Architecture
-
-```
-scripts/
-├── diagnose.sh                  # Main entry point (orchestrator)
-├── lib/                         # Reusable libraries (DRY)
-│   ├── core.sh                  # Foundation utilities
-│   ├── check-engine.sh          # Generic check executor
-│   └── report-builder.sh        # Multi-format reporter
-└── diagnostics/
-    ├── rules.yaml               # All check definitions
-    └── platform/
-        ├── macos.yaml           # macOS-specific checks
-        └── linux.yaml           # Linux-specific checks
-```
-
-## 🚀 Quick Start
+Run all checks with one command:
 
 ```bash
-# Run diagnostics
-./scripts/diagnose.sh
-
-# Generate JSON report
-./scripts/diagnose.sh json
-
-# Generate Markdown report
-./scripts/diagnose.sh markdown > report.md
-
-# Debug mode
-DEBUG=1 ./scripts/diagnose.sh
+./scripts/run-all-checks.sh
 ```
 
-## 🔧 How It Works
+This runs all verification steps in the correct order and provides a comprehensive report.
 
-### 1. Modular Libraries (DRY Foundation)
+## Individual Scripts
 
-**core.sh** - Foundation utilities:
-- Logging (colored output)
-- Platform detection
-- File operations
-- YAML parsing
-- Command availability checking
-- Timer utilities
-- Validation functions
+### 1. Security Check
+**File:** `security-check.sh`
 
-**check-engine.sh** - Generic check types:
-- `command` - Execute and validate command output
-- `file_exists` - Check file presence
-- `url_reachable` - Test URL connectivity
-- `port_available` - Check port status
-- `env_var` - Validate environment variables
-
-**report-builder.sh** - Output formatters:
-- Console (colored, human-readable)
-- JSON (machine-readable, CI/CD)
-- Markdown (documentation)
-- Fix suggestions
-
-### 2. Configuration-Driven Checks
-
-All checks are defined in `diagnostics/rules.yaml`:
-
-```yaml
-checks:
-  - name: docker-running
-    description: Check if Docker daemon is running
-    type: command              # Check type
-    platforms: all             # all | macos | linux | windows
-    severity: critical         # critical | warning | info
-    parameters:
-      command: "docker info"
-      expect: "Server Version"
-      timeout: 10
-```
-
-### 3. Platform-Specific Checks
-
-Platform-specific checks in separate YAML files:
-- `platform/macos.yaml` - macOS Docker Desktop checks
-- `platform/linux.yaml` - systemd service checks
-
-## 📊 Check Types
-
-### Command Check
-```yaml
-- name: my-check
-  type: command
-  parameters:
-    command: "docker --version"
-    expect: "Docker version"
-    timeout: 5
-```
-
-### File Exists Check
-```yaml
-- name: env-file
-  type: file_exists
-  parameters:
-    filepath: "${PROJECT_ROOT}/.env"
-```
-
-### URL Reachable Check
-```yaml
-- name: ollama-api
-  type: url_reachable
-  parameters:
-    url: "${OLLAMA_BASE_URL}/api/version"
-    timeout: 5
-```
-
-### Port Available Check
-```yaml
-- name: litellm-port
-  type: port_available
-  parameters:
-    port: 4000
-```
-
-### Environment Variable Check
-```yaml
-- name: llm-provider
-  type: env_var
-  parameters:
-    var_name: "LLM_PROVIDER"
-    expected_value: "ollama"  # Optional
-```
-
-## 🎨 Output Formats
-
-### Console (Default)
-```bash
-./scripts/diagnose.sh
-
-━━━ AI Researcher Diagnostics ━━━
-[✓] docker-installed
-[✓] docker-running
-[⚠] env-file-exists
-     File not found: /path/to/.env
-[✓] ollama-reachable
-
-━━━ Summary ━━━
-Total checks: 10
-Passed: 8
-Failed: 0
-Warnings: 2
-```
-
-### JSON (CI/CD)
-```bash
-./scripts/diagnose.sh json
-```
-```json
-{
-  "timestamp": "2025-01-05T10:30:00Z",
-  "platform": "macos",
-  "checks": [
-    {
-      "name": "docker-running",
-      "status": "PASS",
-      "message": "Check passed",
-      "severity": "critical",
-      "elapsed_ms": 123
-    }
-  ]
-}
-```
-
-### Markdown (Documentation)
-```bash
-./scripts/diagnose.sh markdown > report.md
-```
-
-## 🔍 Adding New Checks
-
-### 1. Add to rules.yaml
-```yaml
-checks:
-  - name: my-new-check
-    description: What this checks
-    type: command
-    platforms: all
-    severity: warning
-    parameters:
-      command: "my-command"
-      expect: "expected output"
-      timeout: 10
-```
-
-### 2. Add Fix Suggestions
-```yaml
-fixes:
-  my-new-check:
-    - "Step 1 to fix"
-    - "Step 2 to fix"
-```
-
-That's it! No code changes needed.
-
-## 🛠️ Extending
-
-### Adding a New Check Type
-
-Edit `scripts/lib/check-engine.sh`:
+Checks for security vulnerabilities and misconfigurations:
+- Unpinned dependencies
+- Known CVEs in packages
+- Docker security settings
+- Exposed secrets
+- File permissions
+- Network exposure
 
 ```bash
-check_my_type() {
-    local name="$1"
-    local param1="$2"
-    local severity="${3:-info}"
-
-    # Implement your check logic
-    if [[ check passes ]]; then
-        add_result "$name" "PASS" "Success message" "$severity" "$elapsed"
-        return 0
-    else
-        add_result "$name" "FAIL" "Failure message" "$severity" "$elapsed"
-        return 1
-    fi
-}
-
-# Add to dispatcher
-execute_check() {
-    case "$check_type" in
-        # ...existing types...
-        my_type)
-            check_my_type "$@"
-            ;;
-    esac
-}
+./scripts/security-check.sh
 ```
 
-## 📈 Exit Codes
+**Exit codes:**
+- `0` - No critical issues
+- `1` - Critical issues found (must fix before deploy)
 
-| Code | Meaning |
-|------|---------|
-| 0 | All checks passed |
-| 1 | General error |
-| 2 | Missing dependencies |
-| 3 | Configuration error |
-| 10 | One or more critical checks failed |
+### 2. Prerequisites Verification
+**File:** `verify-prerequisites.sh`
 
-## 🔒 Security & Least Privilege
-
-### Allowed Operations (Read-Only)
-- ✅ `docker info` - Read Docker state
-- ✅ `docker ps` - List containers
-- ✅ `curl` - Test connectivity
-- ✅ `test -f` - Check file existence
-- ✅ `grep` - Read configuration
-- ✅ `ls` - List files
-
-### Prohibited Operations
-- ❌ `docker restart` - Modifies state
-- ❌ `sudo anything` - Privilege escalation
-- ❌ `rm/mv/cp` - File modifications
-- ❌ Writing to `.env` - Config changes
-- ❌ `apt install` - System changes
-
-### Principle
-```
-Diagnose → Report → Suggest → User Decides
-   ↓         ↓         ↓
- Read     Display    Guide
- Only     Results    Human
-```
-
-## 🧪 Testing
+Verifies Docker environment and system requirements:
+- Docker & Docker Compose versions
+- System resources (CPU, memory, disk)
+- File sharing configuration (macOS)
+- Ollama installation and connectivity
+- Configuration files
 
 ```bash
-# Test with debug output
-DEBUG=1 ./scripts/diagnose.sh
-
-# Test specific format
-./scripts/diagnose.sh json | jq .
-
-# Test in Docker
-docker run --rm -v $(pwd):/work -w /work alpine sh -c "
-  apk add bash curl &&
-  ./scripts/diagnose.sh
-"
+./scripts/verify-prerequisites.sh
 ```
 
-## 📝 Examples
+**Requirements:**
+- Docker >= 20.10
+- Docker Compose V2
+- 2+ CPUs, 4GB+ RAM
+- Ollama running on host
 
-### Example 1: Pre-Flight Check
+### 3. Container Build & Tests
+**File:** `test-container.sh`
+
+Tests Docker container build and validates functionality:
+- docker-compose.yml validation
+- Container build (5-10 minutes)
+- Python dependency imports
+- Configuration loading
+- File permissions
+- Ollama connectivity
+- Security checks
+
 ```bash
-#!/bin/bash
-# run-before-docker.sh
-
-if ! ./scripts/diagnose.sh json | jq -e '.checks[] | select(.status=="FAIL" and .severity=="critical")' > /dev/null; then
-    echo "✓ Pre-flight checks passed"
-    docker-compose up
-else
-    echo "✗ Critical issues found - fix before starting"
-    ./scripts/diagnose.sh  # Show detailed report
-    exit 1
-fi
+./scripts/test-container.sh
 ```
 
-### Example 2: CI/CD Integration
-```yaml
-# .github/workflows/test.yml
-- name: Run Diagnostics
-  run: |
-    ./scripts/diagnose.sh json > diagnostics.json
+**Note:** This script takes 5-10 minutes due to building llama-cpp-python.
 
-- name: Check Results
-  run: |
-    if jq -e '.checks[] | select(.status=="FAIL" and .severity=="critical")' diagnostics.json; then
-      echo "Critical diagnostic failures"
-      exit 1
-    fi
-```
+## Workflow
 
-### Example 3: Custom Check Suite
+### First-Time Setup
+
 ```bash
-# Create custom rules
-cat > custom-checks.yaml <<EOF
-checks:
-  - name: my-app-running
-    type: command
-    parameters:
-      command: "pgrep myapp"
-EOF
+# 1. Run all checks
+./scripts/run-all-checks.sh
 
-# Run with custom rules
-RULES_FILE=custom-checks.yaml ./scripts/diagnose.sh
+# 2. If checks pass, start services
+docker compose up
+
+# 3. Or open in DevContainer
+code .
 ```
 
-## 🤝 Contributing
+### Before Each Deployment
 
-To add a new check:
-1. Edit `diagnostics/rules.yaml`
-2. Add check definition
-3. Add fix suggestions
-4. Test with `./scripts/diagnose.sh`
-5. Submit PR
-
-No code changes needed for most checks!
-
-## 📚 Further Reading
-
-- [YAML Check Reference](./diagnostics/rules.yaml)
-- [Platform Checks](./diagnostics/platform/)
-- [Core Library API](./lib/core.sh)
-- [Check Engine API](./lib/check-engine.sh)
-
-## 🐛 Troubleshooting
-
-**Issue**: "command not found: yq"
-**Solution**: Basic YAML parsing works without yq. For advanced features, install yq:
 ```bash
-brew install yq  # macOS
-sudo apt install yq  # Ubuntu
+# Security check
+./scripts/security-check.sh
+
+# Full validation
+./scripts/run-all-checks.sh
 ```
 
-**Issue**: Colors not showing
-**Solution**: Ensure you're in a terminal (not piping to file):
+### Troubleshooting Build Failures
+
 ```bash
-./scripts/diagnose.sh  # Colors
-./scripts/diagnose.sh > report.txt  # No colors (automatic)
+# Check prerequisites first
+./scripts/verify-prerequisites.sh
+
+# Run build test with detailed output
+./scripts/test-container.sh
+
+# Check build logs
+docker compose build researcher 2>&1 | tee build.log
 ```
 
-**Issue**: Check times out
-**Solution**: Increase timeout in rules.yaml:
-```yaml
-parameters:
-  timeout: 30  # Increase from default 10
+## Common Issues
+
+### macOS File Sharing
+If you get "operation not permitted" errors:
+1. Open Docker Desktop
+2. Settings → Resources → File Sharing
+3. Add your project directory
+4. Restart Docker Desktop
+
+### Ollama Connectivity
+If container can't reach Ollama:
+1. Verify Ollama is running: `ollama serve`
+2. Test from host: `curl http://localhost:11434/api/tags`
+3. Check `OLLAMA_BASE_URL` in `.env` is set to `http://host.docker.internal:11434`
+
+### Build Timeout
+If llama-cpp-python build times out:
+1. Increase Docker Desktop memory (Settings → Resources)
+2. Close other applications
+3. Retry build: `docker compose build --no-cache researcher`
+
+## Security Best Practices
+
+1. **Always run security-check.sh** before committing code
+2. **Never commit .env** file (it's in .gitignore)
+3. **Use requirements-pinned.txt** for production to avoid supply chain attacks
+4. **Review CVE warnings** and update vulnerable packages
+5. **Limit exposed ports** - only expose what's necessary
+
+## Version Pinning
+
+For production deployments, use pinned requirements:
+
+```bash
+# Copy pinned requirements
+cp requirements-pinned.txt requirements.txt
+
+# Rebuild with pinned versions
+docker compose build --no-cache
 ```
+
+See `requirements-pinned.txt` for security-vetted versions.
+
+## Additional Tools
+
+### Docker Built-in Diagnostics
+
+```bash
+# Validate compose file
+docker compose config
+
+# Check system info
+docker info
+
+# Check resource usage
+docker stats
+```
+
+### Docker Desktop GUI
+- Use Docker Desktop's built-in diagnostics (top-right menu)
+- View container logs in GUI
+- Monitor resource usage
+
+## Exit Codes
+
+All scripts use consistent exit codes:
+- `0` - Success, all checks passed
+- `1` - Failure, issues found
+
+## Contributing
+
+When adding new verification checks:
+1. Add to appropriate script (security, prerequisites, or container tests)
+2. Follow existing output format (colored, clear messages)
+3. Use appropriate exit codes
+4. Update this README
+
+## References
+
+- [Docker Best Practices](https://docs.docker.com/develop/dev-best-practices/)
+- [Docker Security](https://docs.docker.com/engine/security/)
+- [Python Security Advisories](https://github.com/pypa/advisory-database)
